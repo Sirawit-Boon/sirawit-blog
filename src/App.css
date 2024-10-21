@@ -8,6 +8,7 @@
   background-color: #f9f8f6;
   height: 100vh;
   font-family: "Poppins", sans-serif;
+  box-sizing: border-box;
 }
 
 .logo {
