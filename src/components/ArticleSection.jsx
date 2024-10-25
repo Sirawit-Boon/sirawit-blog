@@ -1,46 +1,62 @@
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { blogPosts } from "../data/blogPost";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export function ArticleSection() {
+  const [getBlogPost, setGetBlogPoset] = useState([]);
   const categories = ["Highlight", "Cat", "Inspiration", "General"];
-  const [filteredCategories, setFilteredCategories] = useState(blogPosts);
-  const filteredCat = (category) => {
-    const newItems = blogPosts.filter((data) => data.category === category)
-    setFilteredCategories(newItems);
+  const [filteredCategories, setFilteredCategories] = useState("Highlight");
+
+  useEffect(() => {
+    getData();
+  }, [filteredCategories]);
+
+  const getData = async () => {
+    try {
+      let url = `https://blog-post-project-api.vercel.app/posts`;
+      if (filteredCategories !== "Highlight") {
+        url = `${url}?category=${filteredCategories}`;
+      }
+      const response = await axios.get(url);
+      setGetBlogPoset(response.data.posts);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
-  const buttonElements = categories.slice(1).map((categorie, index) => {
+  const buttonElements = categories.map((category) => {
     return (
       <button
-        key={index}
+        key={category}
         onClick={() => {
-          filteredCat(categorie)
-          className=""
+          setFilteredCategories(category);
+          setGetBlogPoset([]);
         }}
-        className="px-4 py-3 transition-colors rounded-sm text-sm text-muted-foreground font-medium bg-[muted]"
+        className={`px-4 py-3 transition-colors rounded-sm text-sm text-muted-foreground font-medium ${
+          filteredCategories === category ? "bg-[#DAD6D1]" : "bg-none"
+        }`}
       >
-        {categorie}
+        {category}
       </button>
     );
   });
 
-  const buttonAllElements = () => {
-    setFilteredCategories(blogPosts)
-  }
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
   return (
     <section className="latest-article gap-[80px] flex bg-[#F9F8F6] flex-col justify-center items-center">
       <div className="article-header gap-[32px] h-[144px] flex flex-col w-full">
         <h3 className="text-header text-[24px] text-left">Latest articles</h3>
         <div className="article-tabbar flex w-full h-[80px] justify-between items-center bg-[#EFEEEB] rounded-xl px-10">
-          <div className="hidden md:flex space-x-2">
-            <button onClick={buttonAllElements} className="px-4 py-3 transition-colors rounded-sm text-sm text-muted-foreground font-medium bg-[#DAD6D1]">
-              Highlight
-            </button>
-            {buttonElements}
-          </div>
+          <div className="hidden md:flex space-x-2">{buttonElements}</div>
           <div className="input-search relative w-[360px]">
             <Input
               type="text"
@@ -55,7 +71,7 @@ export function ArticleSection() {
         </div>
       </div>
       <div className="blog-card-content grid grid-cols-2 gap-x-4 gap-y-4 max-w-[1200px]">
-        {filteredCategories.map((key, index) => {
+        {getBlogPost.map((key, index) => {
           return (
             <BlogCard
               key={index}
@@ -63,7 +79,7 @@ export function ArticleSection() {
               title={key.title}
               category={key.category}
               description={key.description}
-              date={key.date}
+              date={formatDate(key.date)}
               author={key.author}
             />
           );
