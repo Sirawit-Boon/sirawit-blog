@@ -36,9 +36,7 @@ export function HeroSection() {
           </div>
         </div>
         <ArticleSection />
-        <p className="viewmore underline decoration-1">
-          View more
-        </p>
+
       </main>
     </section>
   );

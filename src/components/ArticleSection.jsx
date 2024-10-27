@@ -2,42 +2,103 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import ClipLoader from "react-spinners/ClipLoader";
+
+export function BlogCard({
+  title,
+  image,
+  category,
+  description,
+  author,
+  date,
+}) {
+  return (
+    <div className="flex flex-col gap-4">
+      <a href="#" className="relative h-[212px] sm:h-[360px]">
+        <img
+          className="w-full h-full object-cover rounded-md"
+          src={image}
+          alt={title}
+        />
+      </a>
+      <div className="flex flex-col">
+        <div className="flex">
+          <span className="bg-green-200 rounded-full px-3 py-1 text-sm font-semibold text-green-600 mb-2">
+            {category}
+          </span>
+        </div>
+        <a href="#">
+          <h2 className="text-start font-bold text-xl mb-2 line-clamp-2 hover:underline">
+            {title}
+          </h2>
+        </a>
+        <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-3 text-start">
+          {description}
+        </p>
+        <div className="flex items-center text-sm">
+          <img
+            className="w-8 h-8 rounded-full mr-2"
+            src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
+            alt="Tomson P."
+          />
+          <span>{author}</span>
+          <span className="mx-2 text-gray-300">|</span>
+          <span>{date}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function ArticleSection() {
-  const [getBlogPost, setGetBlogPoset] = useState([]);
+  const [getBlogPost, setGetBlogPost] = useState([]);
   const categories = ["Highlight", "Cat", "Inspiration", "General"];
-  const [filteredCategories, setFilteredCategories] = useState("Highlight");
+  const [category, setCategory] = useState("Highlight");
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
 
   useEffect(() => {
-    getData();
-  }, [filteredCategories]);
-
-  const getData = async () => {
-    try {
-      let url = `https://blog-post-project-api.vercel.app/posts`;
-      if (filteredCategories !== "Highlight") {
-        url = `${url}?category=${filteredCategories}`;
+    const getData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(
+          category === "Highlight"
+            ? `https://blog-post-project-api.vercel.app/posts?page=${page}&limit=6`
+            : `https://blog-post-project-api.vercel.app/posts?page=${page}&limit=6&category=${category}`
+        );
+        setLoading(false);
+        if (page === 1) {
+          setGetBlogPost(response.data.posts);
+        } else {
+          setGetBlogPost((prev) => [...prev, ...response.data.posts]);
+        }
+        if (response.data.currentPage >= response.data.totalPages) {
+          setHasMore(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setLoading(false);
       }
-      const response = await axios.get(url);
-      setGetBlogPoset(response.data.posts);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+    };
+    getData();
+  }, [page, category]);
 
-  const buttonElements = categories.map((category) => {
+  const buttonElements = categories.map((cat) => {
     return (
       <button
-        key={category}
+        key={cat}
         onClick={() => {
-          setFilteredCategories(category);
-          setGetBlogPoset([]);
+          setCategory(cat);
+          setGetBlogPost([]);
+          setPage(1);
+          setHasMore(true);
         }}
         className={`px-4 py-3 transition-colors rounded-sm text-sm text-muted-foreground font-medium ${
-          filteredCategories === category ? "bg-[#DAD6D1]" : "bg-none"
+          category === cat ? "bg-[#DAD6D1]" : "bg-none"
         }`}
       >
-        {category}
+        {cat}
       </button>
     );
   });
@@ -85,52 +146,18 @@ export function ArticleSection() {
           );
         })}
       </div>
+      {hasMore && (
+        <button onClick={() => setPage(page + 1)} className="viewmore">
+          {loading ? (
+            <div className="flex flex-col gap-2">
+              <div><ClipLoader /></div>
+              ...Loading
+            </div>
+          ) : (
+            <p className="hover:underline">View more</p>
+          )}
+        </button>
+      )}
     </section>
-  );
-}
-
-export function BlogCard({
-  title,
-  image,
-  category,
-  description,
-  author,
-  date,
-}) {
-  return (
-    <div className="flex flex-col gap-4">
-      <a href="#" className="relative h-[212px] sm:h-[360px]">
-        <img
-          className="w-full h-full object-cover rounded-md"
-          src={image}
-          alt={title}
-        />
-      </a>
-      <div className="flex flex-col">
-        <div className="flex">
-          <span className="bg-green-200 rounded-full px-3 py-1 text-sm font-semibold text-green-600 mb-2">
-            {category}
-          </span>
-        </div>
-        <a href="#">
-          <h2 className="text-start font-bold text-xl mb-2 line-clamp-2 hover:underline">
-            {title}
-          </h2>
-        </a>
-        <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-3 text-start">
-          {description}
-        </p>
-        <div className="flex items-center text-sm">
-          <img
-            className="w-8 h-8 rounded-full mr-2"
-            src="https://res.cloudinary.com/dcbpjtd1r/image/upload/v1728449784/my-blog-post/xgfy0xnvyemkklcqodkg.jpg"
-            alt="Tomson P."
-          />
-          <span>{author}</span>
-          <span className="mx-2 text-gray-300">|</span>
-          <span>{date}</span>
-        </div>
-      </div>
-    </div>
   );
 }
