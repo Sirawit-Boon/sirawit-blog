@@ -3,6 +3,7 @@ import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ClipLoader from "react-spinners/ClipLoader";
+import { useNavigate } from "react-router-dom";
 
 export function BlogCard({
   title,
@@ -11,27 +12,33 @@ export function BlogCard({
   description,
   author,
   date,
+  id,
 }) {
+  const navigate = useNavigate();
+  const handleView = () => {
+    navigate(`/post/${id}`);
+  };
   return (
     <div className="flex flex-col gap-4">
-      <a href="#" className="relative h-[212px] sm:h-[360px]">
+      <div onClick={handleView} className="relative h-[212px] sm:h-[360px]">
         <img
-          className="w-full h-full object-cover rounded-md"
+          className="w-full h-full object-cover rounded-md cursor-pointer"
           src={image}
           alt={title}
         />
-      </a>
+      </div>
       <div className="flex flex-col">
         <div className="flex">
           <span className="bg-green-200 rounded-full px-3 py-1 text-sm font-semibold text-green-600 mb-2">
             {category}
           </span>
         </div>
-        <a href="#">
-          <h2 className="text-start font-bold text-xl mb-2 line-clamp-2 hover:underline">
-            {title}
-          </h2>
-        </a>
+        <h2
+          onClick={handleView}
+          className="text-start font-bold text-xl mb-2 line-clamp-2 hover:underline cursor-pointer"
+        >
+          {title}
+        </h2>
         <p className="text-muted-foreground text-sm mb-4 flex-grow line-clamp-3 text-start">
           {description}
         </p>
@@ -57,6 +64,9 @@ export function ArticleSection() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
+  const [input, setInput] = useState("");
+  const [resultInput, setResultInput] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getData = async () => {
@@ -64,10 +74,11 @@ export function ArticleSection() {
         setLoading(true);
         const response = await axios.get(
           category === "Highlight"
-            ? `https://blog-post-project-api.vercel.app/posts?page=${page}&limit=6`
-            : `https://blog-post-project-api.vercel.app/posts?page=${page}&limit=6&category=${category}`
+            ? `https://blog-post-project-api.vercel.app/posts?page=${page}&limit=6&keyword=${input}`
+            : `https://blog-post-project-api.vercel.app/posts?page=${page}&limit=6&category=${category}&keyword=${input}`
         );
         setLoading(false);
+        setResultInput(response.data.posts);
         if (page === 1) {
           setGetBlogPost(response.data.posts);
         } else {
@@ -82,7 +93,7 @@ export function ArticleSection() {
       }
     };
     getData();
-  }, [page, category]);
+  }, [page, category, input]);
 
   const buttonElements = categories.map((cat) => {
     return (
@@ -112,6 +123,11 @@ export function ArticleSection() {
     });
   };
 
+  const handleSearchClick = (postId) => {
+    navigate(`/post/${postId}`)
+    setInput("");
+  }
+
   return (
     <section className="latest-article gap-[80px] flex bg-[#F9F8F6] flex-col justify-center items-center">
       <div className="article-header gap-[32px] h-[144px] flex flex-col w-full">
@@ -123,11 +139,28 @@ export function ArticleSection() {
               type="text"
               placeholder="Search"
               className="w-full rounded-xl"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
             />
             <Search
               className="absolute left-[325px] top-1/4 text-gray-400"
               size={20}
             />
+            {input && resultInput.length > 0 && (
+              <div className="search-list absolute bg-white w-full mt-5 rounded-md shadow-lg z-50 text-start">
+                <ul>
+                  {resultInput.map((post) => (
+                    <li
+                      key={post.id}
+                      onClick={() => handleSearchClick(post.id)}
+                      className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      {post.title}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -142,6 +175,7 @@ export function ArticleSection() {
               description={key.description}
               date={formatDate(key.date)}
               author={key.author}
+              id={key.id}
             />
           );
         })}
@@ -150,7 +184,9 @@ export function ArticleSection() {
         <button onClick={() => setPage(page + 1)} className="viewmore">
           {loading ? (
             <div className="flex flex-col gap-2">
-              <div><ClipLoader /></div>
+              <div>
+                <ClipLoader />
+              </div>
               ...Loading
             </div>
           ) : (

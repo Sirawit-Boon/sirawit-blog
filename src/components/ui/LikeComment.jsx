@@ -1,0 +1,114 @@
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Facebook, Linkedin, Twitter, SmilePlus, Copy } from "lucide-react";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
+import { useState } from "react";
+import { useAlertDialog } from "@/hooks/useAlertDialog";
+import { OpenAlertDialog } from "./OpenAlertDialog";
+
+export function LikeComment() {
+  const { isOpen, openDialog, closeDialog } = useAlertDialog();
+
+  return (
+    <div className="space-y-4 mt-5">
+      <div className="flex items-center justify-between p-5">
+        <button
+          className="bg-white rounded-[999px] border-[1px] border-black p-2 text-center w-[127px] flex items-center justify-center gap-2"
+          onClick={openDialog}
+        >
+          <SmilePlus size={20} />
+          321
+        </button>
+        <div className="flex items-center gap-2 ">
+          <Toaster />
+          <button
+            className="bg-white rounded-[999px] border-[1px] border-black p-2 text-center w-[141px] flex items-center justify-center gap-2"
+            variant="outline"
+            onClick={() => {
+              navigator.clipboard.writeText(encodeURI(window.location.href));
+              toast("Copied", {
+                description: "The article has been copied to your clipboard",
+                action: {
+                  label: "X",
+                  onClick: () => console.log("Undo"),
+                },
+              });
+            }}
+          >
+            <Copy />
+            Copy
+          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full border-[1px] border-black bg-white"
+              onClick={() =>
+                window.open(
+                  `https://www.facebook.com/share.php?u=${encodeURI(
+                    window.location.href
+                  )}`,
+                  "_blank"
+                )
+              }
+            >
+              <Facebook className="w-4 h-4" />
+              <span className="sr-only">Share on Facebook</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full border-[1px] border-black bg-white"
+              onClick={() =>
+                window.open(
+                  `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURI(
+                    window.location.href
+                  )}`,
+                  "_blank"
+                )
+              }
+            >
+              <Linkedin className="w-4 h-4" />
+              <span className="sr-only">Share on LinkedIn</span>
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full border-[1px] border-black bg-white"
+              onClick={() =>
+                window.open(
+                  `https://www.twitter.com/share?&url=${encodeURI(
+                    window.location.href
+                  )}`,
+                  "_blank"
+                )
+              }
+            >
+              <Twitter className="w-4 h-4" />
+              <span className="sr-only">Share on Twitter</span>
+            </Button>
+          </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold">Comment</h2>
+        <div className="flex flex-col items-end gap-3">
+          <Textarea
+            placeholder="What are your thoughts?"
+            className="min-h-[120px] resize-none pr-20"
+          />
+          <Button onClick={openDialog} className="rounded-full w-32 h-12">
+            Send
+          </Button>
+        </div>
+      </div>
+      <OpenAlertDialog
+        isOpen={isOpen}
+        onClose={closeDialog}
+        title={`Create an account to continue`}
+        description={`Already have an account?`}
+      />
+    </div>
+  );
+}
