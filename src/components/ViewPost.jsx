@@ -60,7 +60,7 @@ export function ViewPost() {
                 <ReactMarkdown>{content}</ReactMarkdown>
               </div>
               <div className="like-copy bg-[#EFEEEB] w-full h-[80px] rounded-xl my-10">
-                <LikeComment />
+                <LikeComment likes={likes}/>
               </div>
             </div>
           </div>

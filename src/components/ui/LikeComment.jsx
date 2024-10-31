@@ -7,7 +7,7 @@ import { useState } from "react";
 import { useAlertDialog } from "@/hooks/useAlertDialog";
 import { OpenAlertDialog } from "./OpenAlertDialog";
 
-export function LikeComment() {
+export function LikeComment({ likes }) {
   const { isOpen, openDialog, closeDialog } = useAlertDialog();
 
   return (
@@ -18,7 +18,7 @@ export function LikeComment() {
           onClick={openDialog}
         >
           <SmilePlus size={20} />
-          321
+          {likes}
         </button>
         <div className="flex items-center gap-2 ">
           <Toaster />
