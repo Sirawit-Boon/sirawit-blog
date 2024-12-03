@@ -87,6 +87,9 @@ export function ArticleSection() {
         if (response.data.currentPage >= response.data.totalPages) {
           setHasMore(false);
         }
+        console.log("Current category:", category);
+        console.log("Fetched posts:", getBlogPost);
+        console.log("Current page:", page);
       } catch (error) {
         console.log(error);
         setLoading(false);
