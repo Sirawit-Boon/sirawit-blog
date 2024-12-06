@@ -1,17 +1,16 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
+import HomePage from "./pages/HomePage";
+import ViewPostPage from "./pages/ViewPostPage";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <section>
-        <h1>My First React App on Vite</h1>
-      </section>
-    </>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/post/:postId" element={<ViewPostPage />} />
+      </Routes>
+    </Router>
   );
 }
 
